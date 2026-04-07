@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1051871672052",
+    "project_id": "bloodadonarconnect",
+    "storage_bucket": "bloodadonarconnect.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1051871672052:android:563c02e2b444e69c3b90a1",
+        "android_client_info": {
+          "package_name": "com.example.blooddonarnet"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAvPkE4YgGr9e7aKjXjiah_Kxthfrex8rw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
