@@ -144,7 +144,7 @@ public class ReceiverHomeActivity extends AppCompatActivity {
         btnABPlus.setOnClickListener(v -> selectBlood("AB+", btnABPlus));
         btnABMinus.setOnClickListener(v -> selectBlood("AB-", btnABMinus));
 
-        // Available donors click
+
         cardAvailableDonors.setOnClickListener(v -> {
 
             if (userLat == 0.0 || userLng == 0.0) {
