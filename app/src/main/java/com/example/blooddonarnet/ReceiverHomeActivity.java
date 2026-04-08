@@ -23,6 +23,7 @@ import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
+import com.squareup.picasso.Picasso;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,8 +32,9 @@ public class ReceiverHomeActivity extends AppCompatActivity {
 
     Button btnAPlus, btnAMinus, btnBPlus, btnBMinus,
             btnOPlus, btnOMinus, btnABPlus, btnABMinus;
+    ImageView profileimg;
 
-    TextView username;
+    TextView username,tvCount;
 
     EditText etLocation;
 
@@ -63,21 +65,21 @@ public class ReceiverHomeActivity extends AppCompatActivity {
         btnOMinus = findViewById(R.id.btnOMinus);
         btnABPlus = findViewById(R.id.btnABPlus);
         btnABMinus = findViewById(R.id.btnABMinus);
+        profileimg=findViewById(R.id.imgProfile);
+
 
         username = findViewById(R.id.tvUsername);
+        tvCount=findViewById(R.id.tvCount);
 
         etLocation = findViewById(R.id.etLocation);
+
 
         DrawerLayout drawerLayout = findViewById(R.id.drawerLayout);
         ImageView menu = findViewById(R.id.menu);
         NavigationView navigationView = findViewById(R.id.navigationView);
-
-// Open drawer
         menu.setOnClickListener(v -> {
             drawerLayout.openDrawer(GravityCompat.START);
         });
-
-// Handle clicks
         navigationView.setNavigationItemSelectedListener(item -> {
 
             if (item.getItemId() == R.id.nav_profile) {
@@ -130,9 +132,12 @@ public class ReceiverHomeActivity extends AppCompatActivity {
         getUserLocation();
 
         loadUsername();
+        loadProfileImage();
+        loadDonorCount();
 
 
-       
+
+
 
 
         btnAPlus.setOnClickListener(v -> selectBlood("A+", btnAPlus));
@@ -164,7 +169,7 @@ public class ReceiverHomeActivity extends AppCompatActivity {
             data.put("lat", userLat);
             data.put("lng", userLng);
 
-            // Save inside same user document (no overwrite)
+
             firestore.collection("users")
                     .document(uid)
                     .set(data, SetOptions.merge())
@@ -181,6 +186,46 @@ public class ReceiverHomeActivity extends AppCompatActivity {
                         Toast.makeText(this, "Failed to update", Toast.LENGTH_SHORT).show();
                     });
         });
+    }
+    private void loadDonorCount() {
+
+
+
+        firestore.collection("users")
+                .whereEqualTo("role", "donor")
+                .count()
+                .get(com.google.firebase.firestore.AggregateSource.SERVER)
+                .addOnSuccessListener(snapshot -> {
+                    long count = snapshot.getCount();
+                    tvCount.setText(" " + count);
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+    }
+    private void loadProfileImage() {
+
+        if (auth.getCurrentUser() == null) return;
+
+        String uid = auth.getCurrentUser().getUid();
+
+        firestore.collection("users")
+                .document(uid)
+                .get()
+                .addOnSuccessListener(document -> {
+
+                    if (document.exists()) {
+
+                        String imageUrl = document.getString("profileImage");
+
+                        if (imageUrl != null && !imageUrl.isEmpty()) {
+                            Picasso.get()
+                                    .load(imageUrl)
+                                    .placeholder(R.drawable.profile)
+                                    .into(profileimg);
+                        }
+                    }
+                });
     }
 
     private void selectBlood(String blood, Button selectedBtn) {

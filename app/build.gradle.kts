@@ -48,6 +48,14 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore:24.10.0")
     implementation("com.google.firebase:firebase-auth:22.3.0")
     implementation("com.google.android.gms:play-services-location:21.0.1")
+    implementation("com.cloudinary:cloudinary-android:2.3.1")
+    implementation("com.squareup.picasso:picasso:2.8")
+    implementation("de.hdodenhof:circleimageview:3.1.0")
+
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+
+    implementation ("com.github.bumptech.glide:glide:4.15.1")
+    annotationProcessor ("com.github.bumptech.glide:compiler:4.15.1")
 
 
 }

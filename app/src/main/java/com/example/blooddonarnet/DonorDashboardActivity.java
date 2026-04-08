@@ -5,9 +5,11 @@ import android.os.Bundle;
 import android.widget.*;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.squareup.picasso.Picasso;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -17,11 +19,13 @@ public class DonorDashboardActivity extends AppCompatActivity {
 
     TextView welcomeText, statusText, livesSaved, nextDate;
     Switch availabilitySwitch;
-    Button editProfileBtn, logoutBtn;
+    ImageView profileimg;
+
+    CardView profile,logout;
 
     FirebaseAuth auth;
     FirebaseFirestore db;
-    ImageView logout;
+
 
     String uid;
 
@@ -36,10 +40,12 @@ public class DonorDashboardActivity extends AppCompatActivity {
         livesSaved = findViewById(R.id.livesSaved);
         nextDate = findViewById(R.id.nextDate);
         logout=findViewById(R.id.logout);
+        profileimg=findViewById(R.id.profileimg);
+
 
         availabilitySwitch = findViewById(R.id.availabilitySwitch);
-        editProfileBtn = findViewById(R.id.editProfileBtn);
-        logoutBtn = findViewById(R.id.logoutBtn);
+       profile = findViewById(R.id.profile);
+
         logout.setOnClickListener(v -> startActivity(new Intent(this,LoginActivity.class)));
 
 
@@ -55,6 +61,7 @@ public class DonorDashboardActivity extends AppCompatActivity {
         uid = auth.getCurrentUser().getUid();
 
         loadUserData();
+        loadProfileImage();
 
 
         availabilitySwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
@@ -74,12 +81,12 @@ public class DonorDashboardActivity extends AppCompatActivity {
         });
 
 
-        editProfileBtn.setOnClickListener(v -> {
-            startActivity(new Intent(this, DonorRegistrationActivity.class));
+        profile.setOnClickListener(v -> {
+            startActivity(new Intent(this, ProfileActivity.class));
         });
 
 
-        logoutBtn.setOnClickListener(v -> {
+        logout.setOnClickListener(v -> {
             auth.signOut();
 
             Intent intent = new Intent(this, LoginActivity.class);
@@ -89,7 +96,38 @@ public class DonorDashboardActivity extends AppCompatActivity {
             finish();
         });
     }
+    private void loadProfileImage() {
 
+        if (auth.getCurrentUser() == null) return;
+
+        String uid = auth.getCurrentUser().getUid();
+
+        db.collection("users")
+                .document(uid)
+                .get()
+                .addOnSuccessListener(document -> {
+
+                    if (document.exists()) {
+
+                        String imageUrl = document.getString("profileImage");
+
+                        if (profileimg != null) {
+                            if (imageUrl != null && !imageUrl.isEmpty()) {
+                                Picasso.get()
+                                        .load(imageUrl)
+                                        .placeholder(R.drawable.profile)
+                                        .error(R.drawable.profile)
+                                        .into(profileimg);
+                            } else {
+                                profileimg.setImageResource(R.drawable.profile);
+                            }
+                        }
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+    }
 
     private void loadUserData() {
 

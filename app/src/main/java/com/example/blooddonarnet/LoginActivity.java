@@ -31,7 +31,7 @@ public class LoginActivity extends AppCompatActivity {
         auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
-        // 🔥 AUTO LOGIN FIX
+
         if (auth.getCurrentUser() != null) {
 
             String uid = auth.getCurrentUser().getUid();

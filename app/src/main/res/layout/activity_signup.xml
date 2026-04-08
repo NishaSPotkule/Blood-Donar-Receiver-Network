@@ -72,7 +72,7 @@
             android:padding="15dp"
             android:background="@drawable/input_bg"/>
 
-        <!-- Password -->
+
         <EditText
             android:id="@+id/password"
             android:layout_width="match_parent"
@@ -85,7 +85,7 @@
             android:padding="15dp"
             android:background="@drawable/input_bg"/>
 
-        <!-- Confirm Password -->
+
         <EditText
             android:id="@+id/confirmpassword"
             android:layout_width="match_parent"
