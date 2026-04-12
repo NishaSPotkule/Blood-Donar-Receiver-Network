@@ -8,6 +8,7 @@ public class AvailableDonarModel {
     public double latitude;
     public double longitude;
 
+    public String uid;
     private float distance;
 
     public AvailableDonarModel() {}
@@ -26,6 +27,8 @@ public class AvailableDonarModel {
     public double getLatitude() { return latitude; }
     public double getLongitude() { return longitude; }
 
+    public String getUid() { return uid; }
+    public void setUid(String uid) { this.uid = uid; }
 
     public float getDistance() { return distance; }
     public void setDistance(float distance) { this.distance = distance; }

@@ -246,7 +246,19 @@
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
+
         </LinearLayout>
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Donate Now"
+            android:id="@+id/donatebtn"
+            android:textStyle="bold"
+            android:textSize="23sp"
+            android:backgroundTint="#C62828"
+            android:layout_gravity="center"
+            />
+
 
     </LinearLayout>
 </ScrollView>

@@ -77,6 +77,9 @@ public class AvailableDonorsActivity extends AppCompatActivity {
 
                         if (donor == null) continue;
 
+
+                        donor.setUid(doc.getId());
+
                         if (donor.getLatitude() == 0 || donor.getLongitude() == 0) {
                             continue;
                         }
@@ -90,7 +93,6 @@ public class AvailableDonorsActivity extends AppCompatActivity {
                         );
 
                         float distanceKm = results[0] / 1000;
-
 
                         donor.setDistance(distanceKm);
 

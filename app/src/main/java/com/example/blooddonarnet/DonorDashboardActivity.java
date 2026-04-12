@@ -13,19 +13,17 @@ import com.squareup.picasso.Picasso;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
+import java.util.Locale;
 
 public class DonorDashboardActivity extends AppCompatActivity {
 
     TextView welcomeText, statusText, livesSaved, nextDate;
     Switch availabilitySwitch;
     ImageView profileimg;
-
-    CardView profile,logout;
+    CardView profile, logout;
 
     FirebaseAuth auth;
     FirebaseFirestore db;
-
 
     String uid;
 
@@ -39,14 +37,11 @@ public class DonorDashboardActivity extends AppCompatActivity {
         statusText = findViewById(R.id.statusText);
         livesSaved = findViewById(R.id.livesSaved);
         nextDate = findViewById(R.id.nextDate);
-        logout=findViewById(R.id.logout);
-        profileimg=findViewById(R.id.profileimg);
-
-
         availabilitySwitch = findViewById(R.id.availabilitySwitch);
-       profile = findViewById(R.id.profile);
+        profileimg = findViewById(R.id.profileimg);
+        profile = findViewById(R.id.profile);
+        logout = findViewById(R.id.logout);
 
-        logout.setOnClickListener(v -> startActivity(new Intent(this,LoginActivity.class)));
 
 
         auth = FirebaseAuth.getInstance();
@@ -81,9 +76,9 @@ public class DonorDashboardActivity extends AppCompatActivity {
         });
 
 
-        profile.setOnClickListener(v -> {
-            startActivity(new Intent(this, ProfileActivity.class));
-        });
+        profile.setOnClickListener(v ->
+                startActivity(new Intent(this, ProfileActivity.class))
+        );
 
 
         logout.setOnClickListener(v -> {
@@ -91,16 +86,14 @@ public class DonorDashboardActivity extends AppCompatActivity {
 
             Intent intent = new Intent(this, LoginActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-
             startActivity(intent);
             finish();
         });
+
+
     }
+
     private void loadProfileImage() {
-
-        if (auth.getCurrentUser() == null) return;
-
-        String uid = auth.getCurrentUser().getUid();
 
         db.collection("users")
                 .document(uid)
@@ -111,23 +104,19 @@ public class DonorDashboardActivity extends AppCompatActivity {
 
                         String imageUrl = document.getString("profileImage");
 
-                        if (profileimg != null) {
-                            if (imageUrl != null && !imageUrl.isEmpty()) {
-                                Picasso.get()
-                                        .load(imageUrl)
-                                        .placeholder(R.drawable.profile)
-                                        .error(R.drawable.profile)
-                                        .into(profileimg);
-                            } else {
-                                profileimg.setImageResource(R.drawable.profile);
-                            }
+                        if (imageUrl != null && !imageUrl.isEmpty()) {
+                            Picasso.get()
+                                    .load(imageUrl)
+                                    .placeholder(R.drawable.profile)
+                                    .error(R.drawable.profile)
+                                    .into(profileimg);
+                        } else {
+                            profileimg.setImageResource(R.drawable.profile);
                         }
                     }
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
+
 
     private void loadUserData() {
 
@@ -136,60 +125,42 @@ public class DonorDashboardActivity extends AppCompatActivity {
                 .get()
                 .addOnSuccessListener(doc -> {
 
-                    if (doc.exists()) {
+                    if (!doc.exists()) return;
 
 
-                        String name = doc.getString("name");
-                        welcomeText.setText("Hello, " + name + " 👋");
+                    String name = doc.getString("name");
+                    welcomeText.setText("Hello, " + name + " 👋");
 
 
-                        Boolean available = doc.getBoolean("availability");
+                    Boolean available = doc.getBoolean("availability");
 
-                        if (available != null && available) {
-                            availabilitySwitch.setChecked(true);
-                            statusText.setText("Status: Available");
-                            statusText.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
-                        } else {
-                            availabilitySwitch.setChecked(false);
-                            statusText.setText("Status: Not Available");
-                        }
-
-
-                        Long donations = doc.getLong("donationsCount");
-
-                        if (donations != null) {
-                            long lives = donations * 3;
-                            livesSaved.setText(String.valueOf(lives));
-                        } else {
-                            livesSaved.setText("0");
-                        }
+                    if (available != null && available) {
+                        availabilitySwitch.setChecked(true);
+                        statusText.setText("Status: Available");
+                        statusText.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
+                    } else {
+                        availabilitySwitch.setChecked(false);
+                        statusText.setText("Status: Not Available");
+                    }
 
 
-                        String lastDonation = doc.getString("lastDonation");
+                    Long donations = doc.getLong("donationsCount");
+                    if (donations == null) donations = 0L;
 
-                        if (lastDonation != null) {
-                            try {
-                                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-                                Date lastDate = sdf.parse(lastDonation);
+                    long lives = donations * 3;
+                    livesSaved.setText(String.valueOf(lives));
 
-                                Calendar cal = Calendar.getInstance();
-                                cal.setTime(lastDate);
-                                cal.add(Calendar.DAY_OF_YEAR, 90);
 
-                                String nextDateStr = sdf.format(cal.getTime());
-                                nextDate.setText(nextDateStr);
+                    String next = doc.getString("nextDonation");
 
-                            } catch (Exception e) {
-                                nextDate.setText("Error");
-                            }
-                        } else {
-                            nextDate.setText("Not donated yet");
-                        }
-
+                    if (next != null) {
+                        nextDate.setText(next);
+                    } else {
+                        nextDate.setText("Not donated yet");
                     }
                 })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Error loading data", Toast.LENGTH_SHORT).show();
-                });
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Error loading data", Toast.LENGTH_SHORT).show()
+                );
     }
 }

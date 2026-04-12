@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     app:cardCornerRadius="16dp"
-    app:cardElevation="4dp">
+    app:cardElevation="6dp">
 
     <LinearLayout
         android:orientation="vertical"
@@ -13,18 +13,22 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-
+        <!-- TOP SECTION -->
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical">
 
+            <!-- PROFILE -->
             <ImageView
                 android:layout_width="60dp"
                 android:layout_height="60dp"
                 android:src="@drawable/profile"
-                android:background="@drawable/circle_bg"/>
+                android:background="@drawable/circle_bg"
+                android:padding="4dp"/>
 
+            <!-- NAME + DISTANCE -->
             <LinearLayout
                 android:orientation="vertical"
                 android:layout_marginStart="12dp"
@@ -35,8 +39,9 @@
                 <TextView
                     android:id="@+id/tvName"
                     android:text="Name"
-                    android:textSize="16sp"
+                    android:textSize="18sp"
                     android:textStyle="bold"
+                    android:textColor="#212121"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>
 
@@ -44,7 +49,8 @@
                     android:id="@+id/tvDistance"
                     android:text="2.5 km away"
                     android:textSize="13sp"
-                    android:textColor="#777"
+                    android:textColor="#888"
+                    android:layout_marginTop="4dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>
             </LinearLayout>
@@ -55,37 +61,60 @@
                 android:text="A+"
                 android:textColor="#C62828"
                 android:textStyle="bold"
+                android:gravity="center"
                 android:background="@drawable/circle_bg"
-                android:padding="10dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:padding="12dp"
+                android:textSize="14sp"
+                android:layout_width="50dp"
+                android:layout_height="50dp"/>
         </LinearLayout>
 
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#EEEEEE"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- BUTTONS -->
+        <!-- BUTTONS -->
         <LinearLayout
             android:orientation="horizontal"
-            android:layout_marginTop="12dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
             <Button
-                android:id="@+id/btnCall"
-                android:text="Call"
-                android:textColor="#FFF"
+                android:id="@+id/btnRequest"
+                android:text="Request"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
                 android:backgroundTint="#C62828"
                 android:layout_weight="1"
                 android:layout_width="0dp"
-                android:layout_height="45dp"/>
+                android:layout_height="48dp"/>
+
+            <Button
+                android:id="@+id/btnCall"
+                android:text="Call"
+                android:textColor="#C62828"
+                android:textStyle="bold"
+                android:backgroundTint="#FDEAEA"
+                android:layout_marginStart="8dp"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="48dp"/>
 
             <Button
                 android:id="@+id/btnMessage"
                 android:text="Message"
-                android:textColor="#000"
-                android:backgroundTint="#F5C6B8"
+                android:textColor="#C62828"
+                android:textStyle="bold"
+                android:backgroundTint="#FDEAEA"
                 android:layout_marginStart="8dp"
                 android:layout_weight="1"
                 android:layout_width="0dp"
-                android:layout_height="45dp"/>
+                android:layout_height="48dp"/>
         </LinearLayout>
 
     </LinearLayout>
