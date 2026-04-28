@@ -8,7 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -46,41 +45,43 @@ public class AvailableDonorAdapter extends RecyclerView.Adapter<AvailableDonorAd
         holder.distance.setText(String.format("%.1f km away", donor.getDistance()));
 
 
+        if (donor.isRequested()) {
+            holder.request.setText("Requested");
+            holder.request.setEnabled(false);
+        } else {
+            holder.request.setText("Request");
+            holder.request.setEnabled(true);
+        }
+
+        holder.request.setOnClickListener(v -> {
+
+            String receiverId = FirebaseAuth.getInstance().getUid();
+
+            HashMap<String, Object> map = new HashMap<>();
+            map.put("receiverId", receiverId);
+            map.put("donorId", donor.getUid());
+            map.put("bloodGroup", donor.getBloodGroup());
+            map.put("status", "pending");
+
+            FirebaseFirestore.getInstance()
+                    .collection("requests")
+                    .add(map)
+                    .addOnSuccessListener(doc -> {
+                        holder.request.setText("Requested");
+                        holder.request.setEnabled(false);
+                    });
+        });
+
         holder.call.setOnClickListener(v -> {
             Intent intent = new Intent(Intent.ACTION_DIAL);
             intent.setData(Uri.parse("tel:" + donor.getPhone()));
             context.startActivity(intent);
         });
 
-
         holder.message.setOnClickListener(v -> {
             Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.setData(Uri.parse("sms:" + donor.getPhone()));
             context.startActivity(intent);
-        });
-
-
-        holder.request.setOnClickListener(v -> {
-
-            String receiverId = FirebaseAuth.getInstance().getUid();
-
-            if (receiverId == null) return;
-
-            HashMap<String, Object> map = new HashMap<>();
-            map.put("donorId", donor.getUid());
-            map.put("receiverId", receiverId);
-            map.put("status", "pending");
-            map.put("timestamp", System.currentTimeMillis());
-
-            FirebaseFirestore.getInstance()
-                    .collection("requests")
-                    .add(map)
-                    .addOnSuccessListener(unused ->
-                            Toast.makeText(context, "Request Sent ❤️", Toast.LENGTH_SHORT).show()
-                    )
-                    .addOnFailureListener(e ->
-                            Toast.makeText(context, "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show()
-                    );
         });
     }
 

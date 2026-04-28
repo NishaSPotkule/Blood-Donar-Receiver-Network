@@ -11,6 +11,9 @@ public class AvailableDonarModel {
     public String uid;
     private float distance;
 
+    // 🔥 NEW
+    private boolean isRequested;
+
     public AvailableDonarModel() {}
 
     public AvailableDonarModel(String name, String phone, String bloodGroup, double lat, double lng) {
@@ -32,4 +35,7 @@ public class AvailableDonarModel {
 
     public float getDistance() { return distance; }
     public void setDistance(float distance) { this.distance = distance; }
+
+    public boolean isRequested() { return isRequested; }
+    public void setRequested(boolean requested) { isRequested = requested; }
 }

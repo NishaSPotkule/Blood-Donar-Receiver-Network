@@ -9,6 +9,7 @@ import androidx.cardview.widget.CardView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.squareup.picasso.Picasso;
 
 import java.text.SimpleDateFormat;
@@ -46,6 +47,15 @@ public class DonorDashboardActivity extends AppCompatActivity {
 
         auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
+
+        FirebaseMessaging.getInstance().getToken()
+                .addOnSuccessListener(token -> {
+
+                    FirebaseFirestore.getInstance()
+                            .collection("users")
+                            .document(uid)
+                            .update("fcmToken", token);
+                });
 
         if (auth.getCurrentUser() == null) {
             startActivity(new Intent(this, LoginActivity.class));

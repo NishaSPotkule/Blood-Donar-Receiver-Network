@@ -13,6 +13,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public class AvailableDonorsActivity extends AppCompatActivity {
 
@@ -25,6 +26,9 @@ public class AvailableDonorsActivity extends AppCompatActivity {
 
     FirebaseFirestore firestore;
     FirebaseAuth auth;
+
+
+    HashSet<String> requestedDonors = new HashSet<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +60,30 @@ public class AvailableDonorsActivity extends AppCompatActivity {
             return;
         }
 
+        String receiverId = auth.getCurrentUser().getUid();
+
+
+        firestore.collection("requests")
+                .whereEqualTo("receiverId", receiverId)
+                .get()
+                .addOnSuccessListener(requestQuery -> {
+
+                    requestedDonors.clear();
+
+                    for (var doc : requestQuery.getDocuments()) {
+                        String donorId = doc.getString("donorId");
+                        if (donorId != null) {
+                            requestedDonors.add(donorId);
+                        }
+                    }
+
+
+                    loadDonorList();
+                });
+    }
+
+    private void loadDonorList() {
+
         firestore.collection("users")
                 .whereEqualTo("bloodGroup", blood)
                 .whereEqualTo("role", "donor")
@@ -67,7 +95,6 @@ public class AvailableDonorsActivity extends AppCompatActivity {
 
                     for (var doc : query.getDocuments()) {
 
-
                         if (auth.getCurrentUser() != null &&
                                 doc.getId().equals(auth.getCurrentUser().getUid())) {
                             continue;
@@ -76,7 +103,6 @@ public class AvailableDonorsActivity extends AppCompatActivity {
                         AvailableDonarModel donor = doc.toObject(AvailableDonarModel.class);
 
                         if (donor == null) continue;
-
 
                         donor.setUid(doc.getId());
 
@@ -96,12 +122,16 @@ public class AvailableDonorsActivity extends AppCompatActivity {
 
                         donor.setDistance(distanceKm);
 
+                        if (requestedDonors.contains(donor.getUid())) {
+                            donor.setRequested(true);
+                        } else {
+                            donor.setRequested(false);
+                        }
 
                         if (distanceKm <= 20) {
                             list.add(donor);
                         }
                     }
-
 
                     list.sort((d1, d2) -> Float.compare(d1.getDistance(), d2.getDistance()));
 
