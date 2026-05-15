@@ -11,7 +11,6 @@ public class AvailableDonarModel {
     public String uid;
     private float distance;
 
-    // 🔥 NEW
     private boolean isRequested;
 
     public AvailableDonarModel() {}

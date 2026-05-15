@@ -3,16 +3,27 @@ package com.example.blooddonarnet;
 public class Request {
 
     private String requestId;
+
     private String receiverId;
     private String receiverName;
     private String receiverPhone;
+
+    private double receiverLatitude;
+    private double receiverLongitude;
+
     private String donorId;
+
     private String bloodGroup;
+
     private String status;
+
     private long timestamp;
 
-    public Request() {}
+    private boolean isReceived;
 
+
+    public Request() {
+    }
 
     public String getRequestId() {
         return requestId;
@@ -46,6 +57,22 @@ public class Request {
         this.receiverPhone = receiverPhone;
     }
 
+    public double getReceiverLatitude() {
+        return receiverLatitude;
+    }
+
+    public void setReceiverLatitude(double receiverLatitude) {
+        this.receiverLatitude = receiverLatitude;
+    }
+
+    public double getReceiverLongitude() {
+        return receiverLongitude;
+    }
+
+    public void setReceiverLongitude(double receiverLongitude) {
+        this.receiverLongitude = receiverLongitude;
+    }
+
     public String getDonorId() {
         return donorId;
     }
@@ -76,5 +103,13 @@ public class Request {
 
     public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public boolean isReceived() {
+        return isReceived;
+    }
+
+    public void setReceived(boolean received) {
+        isReceived = received;
     }
 }

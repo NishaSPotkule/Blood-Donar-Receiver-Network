@@ -8,11 +8,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
@@ -31,7 +33,8 @@ public class AvailableDonorAdapter extends RecyclerView.Adapter<AvailableDonorAd
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.item_donor_list, parent, false);
+        View view = LayoutInflater.from(context)
+                .inflate(R.layout.item_donor_list, parent, false);
         return new ViewHolder(view);
     }
 
@@ -43,7 +46,6 @@ public class AvailableDonorAdapter extends RecyclerView.Adapter<AvailableDonorAd
         holder.name.setText(donor.getName());
         holder.blood.setText(donor.getBloodGroup());
         holder.distance.setText(String.format("%.1f km away", donor.getDistance()));
-
 
         if (donor.isRequested()) {
             holder.request.setText("Requested");
@@ -57,18 +59,51 @@ public class AvailableDonorAdapter extends RecyclerView.Adapter<AvailableDonorAd
 
             String receiverId = FirebaseAuth.getInstance().getUid();
 
-            HashMap<String, Object> map = new HashMap<>();
-            map.put("receiverId", receiverId);
-            map.put("donorId", donor.getUid());
-            map.put("bloodGroup", donor.getBloodGroup());
-            map.put("status", "pending");
+            if (receiverId == null) return;
+
+            holder.request.setEnabled(false);
 
             FirebaseFirestore.getInstance()
-                    .collection("requests")
-                    .add(map)
-                    .addOnSuccessListener(doc -> {
-                        holder.request.setText("Requested");
-                        holder.request.setEnabled(false);
+                    .collection("users")
+                    .document(receiverId)
+                    .get()
+                    .addOnSuccessListener((DocumentSnapshot doc) -> {
+
+                        HashMap<String, Object> map = new HashMap<>();
+
+                        map.put("receiverId", receiverId);
+                        map.put("donorId", donor.getUid());
+                        map.put("bloodGroup", donor.getBloodGroup());
+                        map.put("status", "pending");
+                        map.put("timestamp", System.currentTimeMillis());
+
+                        // receiver data
+                        map.put("receiverName", doc.getString("name"));
+                        map.put("receiverPhone", doc.getString("phone"));
+                        map.put("receiverLatitude", doc.getDouble("latitude"));
+                        map.put("receiverLongitude", doc.getDouble("longitude"));
+
+                        FirebaseFirestore.getInstance()
+                                .collection("requests")
+                                .add(map)
+                                .addOnSuccessListener(r -> {
+
+                                    donor.setRequested(true);
+                                    holder.request.setText("Requested");
+
+                                    Toast.makeText(context,
+                                            "Request Sent",
+                                            Toast.LENGTH_SHORT).show();
+                                })
+                                .addOnFailureListener(e -> {
+
+                                    holder.request.setEnabled(true);
+                                    holder.request.setText("Request");
+
+                                    Toast.makeText(context,
+                                            e.getMessage(),
+                                            Toast.LENGTH_SHORT).show();
+                                });
                     });
         });
 
