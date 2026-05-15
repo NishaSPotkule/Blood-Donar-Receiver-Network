@@ -38,7 +38,7 @@ public class ReceiverHomeActivity extends AppCompatActivity {
 
     EditText etLocation;
 
-    CardView cardAvailableDonors;
+    CardView cardAvailableDonors,cardMyRequests;
 
     String selectedBlood = "A+";
 
@@ -66,7 +66,9 @@ public class ReceiverHomeActivity extends AppCompatActivity {
         btnABPlus = findViewById(R.id.btnABPlus);
         btnABMinus = findViewById(R.id.btnABMinus);
         profileimg=findViewById(R.id.imgProfile);
+        cardMyRequests=findViewById(R.id.cardMyRequests);
 
+        cardMyRequests.setOnClickListener(v -> startActivity(new Intent(this,ReceiverRequestsActivity.class)));
 
         username = findViewById(R.id.tvUsername);
         tvCount=findViewById(R.id.tvCount);
