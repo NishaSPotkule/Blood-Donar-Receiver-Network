@@ -20,102 +20,273 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class AvailableDonorAdapter extends RecyclerView.Adapter<AvailableDonorAdapter.ViewHolder> {
+public class AvailableDonorAdapter
+        extends RecyclerView.Adapter<AvailableDonorAdapter.ViewHolder> {
 
     Context context;
     ArrayList<AvailableDonarModel> list;
 
-    public AvailableDonorAdapter(Context context, ArrayList<AvailableDonarModel> list) {
+    public AvailableDonorAdapter(
+            Context context,
+            ArrayList<AvailableDonarModel> list
+    ) {
+
         this.context = context;
         this.list = list;
     }
 
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context)
-                .inflate(R.layout.item_donor_list, parent, false);
+    public ViewHolder onCreateViewHolder(
+            @NonNull ViewGroup parent,
+            int viewType
+    ) {
+
+        View view = LayoutInflater
+                .from(context)
+                .inflate(
+                        R.layout.item_donor_list,
+                        parent,
+                        false
+                );
+
         return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+    public void onBindViewHolder(
+            @NonNull ViewHolder holder,
+            int position
+    ) {
 
-        AvailableDonarModel donor = list.get(position);
+        AvailableDonarModel donor =
+                list.get(position);
 
-        holder.name.setText(donor.getName());
-        holder.blood.setText(donor.getBloodGroup());
-        holder.distance.setText(String.format("%.1f km away", donor.getDistance()));
+        holder.name.setText(
+                donor.getName()
+        );
+
+        holder.blood.setText(
+                donor.getBloodGroup()
+        );
+
+        holder.distance.setText(
+                String.format(
+                        "%.1f km away",
+                        donor.getDistance()
+                )
+        );
+
+        // Request Button State
 
         if (donor.isRequested()) {
-            holder.request.setText("Requested");
+
+            holder.request.setText(
+                    "Requested"
+            );
+
             holder.request.setEnabled(false);
+
         } else {
-            holder.request.setText("Request");
+
+            holder.request.setText(
+                    "Request"
+            );
+
             holder.request.setEnabled(true);
         }
 
+        // SEND REQUEST
+
         holder.request.setOnClickListener(v -> {
 
-            String receiverId = FirebaseAuth.getInstance().getUid();
+            String receiverId =
+                    FirebaseAuth
+                            .getInstance()
+                            .getUid();
 
-            if (receiverId == null) return;
+            if (receiverId == null)
+                return;
 
-            holder.request.setEnabled(false);
+            // CHECK DUPLICATE REQUEST
 
             FirebaseFirestore.getInstance()
-                    .collection("users")
-                    .document(receiverId)
+                    .collection("requests")
+                    .whereEqualTo(
+                            "receiverId",
+                            receiverId
+                    )
+                    .whereEqualTo(
+                            "donorId",
+                            donor.getUid()
+                    )
                     .get()
-                    .addOnSuccessListener((DocumentSnapshot doc) -> {
+                    .addOnSuccessListener(snapshot -> {
 
-                        HashMap<String, Object> map = new HashMap<>();
+                        // Already Requested
 
-                        map.put("receiverId", receiverId);
-                        map.put("donorId", donor.getUid());
-                        map.put("bloodGroup", donor.getBloodGroup());
-                        map.put("status", "pending");
-                        map.put("timestamp", System.currentTimeMillis());
+                        if (!snapshot.isEmpty()) {
 
-                        // receiver data
-                        map.put("receiverName", doc.getString("name"));
-                        map.put("receiverPhone", doc.getString("phone"));
-                        map.put("receiverLatitude", doc.getDouble("latitude"));
-                        map.put("receiverLongitude", doc.getDouble("longitude"));
+                            Toast.makeText(
+                                    context,
+                                    "Request already sent",
+                                    Toast.LENGTH_SHORT
+                            ).show();
+
+                            holder.request.setText(
+                                    "Requested"
+                            );
+
+                            holder.request.setEnabled(false);
+
+                            return;
+                        }
+
+                        // GET RECEIVER DATA
 
                         FirebaseFirestore.getInstance()
-                                .collection("requests")
-                                .add(map)
-                                .addOnSuccessListener(r -> {
+                                .collection("users")
+                                .document(receiverId)
+                                .get()
+                                .addOnSuccessListener(
+                                        (DocumentSnapshot doc) -> {
 
-                                    donor.setRequested(true);
-                                    holder.request.setText("Requested");
+                                            HashMap<String, Object> map =
+                                                    new HashMap<>();
 
-                                    Toast.makeText(context,
-                                            "Request Sent",
-                                            Toast.LENGTH_SHORT).show();
-                                })
-                                .addOnFailureListener(e -> {
+                                            // Receiver Data
 
-                                    holder.request.setEnabled(true);
-                                    holder.request.setText("Request");
+                                            map.put(
+                                                    "receiverId",
+                                                    receiverId
+                                            );
 
-                                    Toast.makeText(context,
-                                            e.getMessage(),
-                                            Toast.LENGTH_SHORT).show();
-                                });
+                                            map.put(
+                                                    "receiverName",
+                                                    doc.getString("name")
+                                            );
+
+                                            map.put(
+                                                    "receiverPhone",
+                                                    doc.getString("phone")
+                                            );
+
+                                            map.put(
+                                                    "receiverLatitude",
+                                                    doc.getDouble("latitude")
+                                            );
+
+                                            map.put(
+                                                    "receiverLongitude",
+                                                    doc.getDouble("longitude")
+                                            );
+
+                                            // Donor Data
+
+                                            map.put(
+                                                    "donorId",
+                                                    donor.getUid()
+                                            );
+
+                                            map.put(
+                                                    "donorName",
+                                                    donor.getName()
+                                            );
+
+                                            map.put(
+                                                    "donorPhone",
+                                                    donor.getPhone()
+                                            );
+
+                                            // Blood Data
+
+                                            map.put(
+                                                    "bloodGroup",
+                                                    donor.getBloodGroup()
+                                            );
+
+                                            // Status
+
+                                            map.put(
+                                                    "status",
+                                                    "pending"
+                                            );
+
+                                            map.put(
+                                                    "isReceived",
+                                                    false
+                                            );
+
+                                            map.put(
+                                                    "timestamp",
+                                                    System.currentTimeMillis()
+                                            );
+
+                                            // SAVE REQUEST
+
+                                            FirebaseFirestore
+                                                    .getInstance()
+                                                    .collection("requests")
+                                                    .add(map)
+                                                    .addOnSuccessListener(r -> {
+
+                                                        donor.setRequested(true);
+
+                                                        holder.request.setText(
+                                                                "Requested"
+                                                        );
+
+                                                        holder.request.setEnabled(false);
+
+                                                        Toast.makeText(
+                                                                context,
+                                                                "Request Sent Successfully",
+                                                                Toast.LENGTH_SHORT
+                                                        ).show();
+                                                    })
+                                                    .addOnFailureListener(e -> {
+
+                                                        holder.request.setEnabled(true);
+
+                                                        Toast.makeText(
+                                                                context,
+                                                                e.getMessage(),
+                                                                Toast.LENGTH_SHORT
+                                                        ).show();
+                                                    });
+                                        });
                     });
         });
 
+        // CALL BUTTON
+
         holder.call.setOnClickListener(v -> {
-            Intent intent = new Intent(Intent.ACTION_DIAL);
-            intent.setData(Uri.parse("tel:" + donor.getPhone()));
+
+            Intent intent =
+                    new Intent(Intent.ACTION_DIAL);
+
+            intent.setData(
+                    Uri.parse(
+                            "tel:" + donor.getPhone()
+                    )
+            );
+
             context.startActivity(intent);
         });
 
+        // MESSAGE BUTTON
+
         holder.message.setOnClickListener(v -> {
-            Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.setData(Uri.parse("sms:" + donor.getPhone()));
+
+            Intent intent =
+                    new Intent(Intent.ACTION_VIEW);
+
+            intent.setData(
+                    Uri.parse(
+                            "sms:" + donor.getPhone()
+                    )
+            );
+
             context.startActivity(intent);
         });
     }
@@ -125,21 +296,42 @@ public class AvailableDonorAdapter extends RecyclerView.Adapter<AvailableDonorAd
         return list.size();
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
+    // VIEW HOLDER
 
-        TextView name, blood, distance;
-        Button call, message, request;
+    public static class ViewHolder
+            extends RecyclerView.ViewHolder {
 
-        public ViewHolder(@NonNull View itemView) {
+        TextView name,
+                blood,
+                distance;
+
+        Button call,
+                message,
+                request;
+
+        public ViewHolder(
+                @NonNull View itemView
+        ) {
+
             super(itemView);
 
-            name = itemView.findViewById(R.id.tvName);
-            blood = itemView.findViewById(R.id.tvBlood);
-            distance = itemView.findViewById(R.id.tvDistance);
+            name =
+                    itemView.findViewById(R.id.tvName);
 
-            call = itemView.findViewById(R.id.btnCall);
-            message = itemView.findViewById(R.id.btnMessage);
-            request = itemView.findViewById(R.id.btnRequest);
+            blood =
+                    itemView.findViewById(R.id.tvBlood);
+
+            distance =
+                    itemView.findViewById(R.id.tvDistance);
+
+            call =
+                    itemView.findViewById(R.id.btnCall);
+
+            message =
+                    itemView.findViewById(R.id.btnMessage);
+
+            request =
+                    itemView.findViewById(R.id.btnRequest);
         }
     }
 }

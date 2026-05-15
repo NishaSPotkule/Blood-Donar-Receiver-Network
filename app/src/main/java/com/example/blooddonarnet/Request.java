@@ -21,6 +21,8 @@ public class Request {
 
     private boolean isReceived;
 
+    private String donorName;
+    private String donorPhone;
 
     public Request() {
     }
@@ -111,5 +113,20 @@ public class Request {
 
     public void setReceived(boolean received) {
         isReceived = received;
+    }
+    public String getDonorName() {
+        return donorName;
+    }
+
+    public void setDonorName(String donorName) {
+        this.donorName = donorName;
+    }
+
+    public String getDonorPhone() {
+        return donorPhone;
+    }
+
+    public void setDonorPhone(String donorPhone) {
+        this.donorPhone = donorPhone;
     }
 }
