@@ -25,6 +25,10 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
 import com.squareup.picasso.Picasso;
 
+
+import android.location.Address;
+import android.location.Geocoder;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -280,19 +284,61 @@ public class ReceiverHomeActivity extends AppCompatActivity {
         }
 
         locationClient.getLastLocation().addOnSuccessListener(location -> {
+
             if (location != null) {
+
                 userLat = location.getLatitude();
                 userLng = location.getLongitude();
 
+                try {
 
-                etLocation.setText("Lat: " + userLat + ", Lng: " + userLng);
+                    android.location.Geocoder geocoder =
+                            new android.location.Geocoder(this);
+
+                    java.util.List<android.location.Address> addresses =
+                            geocoder.getFromLocation(userLat, userLng, 1);
+
+                    if (addresses != null && !addresses.isEmpty()) {
+
+                        android.location.Address address = addresses.get(0);
+
+                        String city = address.getLocality();
+                        String state = address.getAdminArea();
+                        String country = address.getCountryName();
+
+                        String fullLocation = "";
+
+                        if (city != null) {
+                            fullLocation += city;
+                        }
+
+                        if (state != null) {
+                            fullLocation += ", " + state;
+                        }
+
+                        if (country != null) {
+                            fullLocation += ", " + country;
+                        }
+
+                        etLocation.setText(fullLocation);
+
+                    } else {
+
+                        etLocation.setText("Location not found");
+                    }
+
+                } catch (Exception e) {
+
+                    e.printStackTrace();
+                    etLocation.setText("Unable to get address");
+                }
 
             } else {
+
                 Toast.makeText(this, "Enable GPS", Toast.LENGTH_SHORT).show();
             }
         });
     }
-
     private void loadUsername() {
 
         if (auth == null || auth.getCurrentUser() == null) return;
