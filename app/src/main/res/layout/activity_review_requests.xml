@@ -7,13 +7,13 @@
     android:background="#F6F6F6">
 
 
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="70dp"
         android:background="#C62828"
         android:gravity="center_vertical"
         android:padding="20dp">
+
 
 
 
