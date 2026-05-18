@@ -126,6 +126,8 @@ public class AvailableDonorsActivity extends AppCompatActivity {
                     for (QueryDocumentSnapshot doc :
                             query) {
 
+                        // SKIP CURRENT USER
+
                         if (auth.getCurrentUser() != null
                                 && doc.getId().equals(
                                 auth.getCurrentUser().getUid()
@@ -144,7 +146,27 @@ public class AvailableDonorsActivity extends AppCompatActivity {
 
                         donor.setUid(doc.getId());
 
-                        // BLOOD MATCH CHECK
+                        // CHECK NEXT DONATION TIME
+
+                        Long nextDonationTime =
+                                doc.getLong(
+                                        "nextDonationTime"
+                                );
+
+                        if (nextDonationTime != null) {
+
+                            long currentTime =
+                                    System.currentTimeMillis();
+
+                            // donor not eligible yet
+
+                            if (currentTime < nextDonationTime) {
+
+                                continue;
+                            }
+                        }
+
+                        // BLOOD GROUP MATCH
 
                         if (donor.getBloodGroup() == null
                                 || !compatibleGroups.contains(
