@@ -122,35 +122,74 @@ public class ReceiverRequestAdapter
 
     private void updateDonorStats(String donorId) {
 
-        FirebaseFirestore.getInstance()
-                .collection("users")
+        FirebaseFirestore db =
+                FirebaseFirestore.getInstance();
+
+        db.collection("users")
                 .document(donorId)
                 .get()
+
                 .addOnSuccessListener(doc -> {
 
-                    Long saved =
+                    if (!doc.exists())
+                        return;
+
+                    Long livesSaved =
                             doc.getLong("livesSaved");
 
-                    if (saved == null)
-                        saved = 0L;
+                    if (livesSaved == null) {
+                        livesSaved = 0L;
+                    }
 
-                    saved++;
+                    livesSaved++;
 
-                    HashMap<String, Object> map =
+                    long nextDonationMillis =
+                            System.currentTimeMillis()
+                                    + (90L * 24 * 60 * 60 * 1000);
+
+                    java.text.SimpleDateFormat sdf =
+                            new java.text.SimpleDateFormat(
+                                    "dd MMM yyyy",
+                                    java.util.Locale.getDefault()
+                            );
+
+                    String nextDonationDate =
+                            sdf.format(
+                                    new java.util.Date(
+                                            nextDonationMillis
+                                    )
+                            );
+
+                    HashMap<String, Object> updates =
                             new HashMap<>();
 
-                    map.put("livesSaved", saved);
-
-                    map.put(
-                            "nextDonationTime",
-                            System.currentTimeMillis()
-                                    + (90L * 24 * 60 * 60 * 1000)
+                    updates.put(
+                            "livesSaved",
+                            livesSaved
                     );
 
-                    FirebaseFirestore.getInstance()
-                            .collection("users")
+                    updates.put(
+                            "nextDonation",
+                            nextDonationDate
+                    );
+
+                    updates.put(
+                            "availability",
+                            false
+                    );
+
+                    db.collection("users")
                             .document(donorId)
-                            .update(map);
+                            .update(updates)
+
+                            .addOnSuccessListener(unused ->
+
+                                    Toast.makeText(
+                                            context,
+                                            "Donor stats updated",
+                                            Toast.LENGTH_SHORT
+                                    ).show()
+                            );
                 });
     }
 

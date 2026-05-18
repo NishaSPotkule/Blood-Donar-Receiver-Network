@@ -11,9 +11,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 
 public class AvailableDonorsActivity extends AppCompatActivity {
 
@@ -26,7 +29,6 @@ public class AvailableDonorsActivity extends AppCompatActivity {
 
     FirebaseFirestore firestore;
     FirebaseAuth auth;
-
 
     HashSet<String> requestedDonors = new HashSet<>();
 
@@ -41,42 +43,67 @@ public class AvailableDonorsActivity extends AppCompatActivity {
         auth = FirebaseAuth.getInstance();
 
         list = new ArrayList<>();
-        adapter = new AvailableDonorAdapter(this, list);
 
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        adapter = new AvailableDonorAdapter(
+                this,
+                list
+        );
+
+        recyclerView.setLayoutManager(
+                new LinearLayoutManager(this)
+        );
+
         recyclerView.setAdapter(adapter);
 
-        userLat = getIntent().getDoubleExtra("lat", 0);
-        userLng = getIntent().getDoubleExtra("lng", 0);
-        blood = getIntent().getStringExtra("bloodGroup");
+        userLat = getIntent()
+                .getDoubleExtra("lat", 0);
+
+        userLng = getIntent()
+                .getDoubleExtra("lng", 0);
+
+        blood = getIntent()
+                .getStringExtra("bloodGroup");
 
         loadDonors();
     }
 
     private void loadDonors() {
 
-        if (blood == null) {
-            Toast.makeText(this, "Blood group missing", Toast.LENGTH_SHORT).show();
+        if (blood == null || blood.isEmpty()) {
+
+            Toast.makeText(
+                    this,
+                    "Blood group missing",
+                    Toast.LENGTH_SHORT
+            ).show();
+
             return;
         }
 
-        String receiverId = auth.getCurrentUser().getUid();
-
+        String receiverId =
+                auth.getCurrentUser().getUid();
 
         firestore.collection("requests")
-                .whereEqualTo("receiverId", receiverId)
+                .whereEqualTo(
+                        "receiverId",
+                        receiverId
+                )
                 .get()
                 .addOnSuccessListener(requestQuery -> {
 
                     requestedDonors.clear();
 
-                    for (var doc : requestQuery.getDocuments()) {
-                        String donorId = doc.getString("donorId");
+                    for (QueryDocumentSnapshot doc :
+                            requestQuery) {
+
+                        String donorId =
+                                doc.getString("donorId");
+
                         if (donorId != null) {
+
                             requestedDonors.add(donorId);
                         }
                     }
-
 
                     loadDonorList();
                 });
@@ -84,67 +111,194 @@ public class AvailableDonorsActivity extends AppCompatActivity {
 
     private void loadDonorList() {
 
+        List<String> compatibleGroups =
+                getCompatibleDonors(blood);
+
         firestore.collection("users")
-                .whereEqualTo("bloodGroup", blood)
                 .whereEqualTo("role", "donor")
                 .whereEqualTo("availability", true)
                 .get()
+
                 .addOnSuccessListener(query -> {
 
                     list.clear();
 
-                    for (var doc : query.getDocuments()) {
+                    for (QueryDocumentSnapshot doc :
+                            query) {
 
-                        if (auth.getCurrentUser() != null &&
-                                doc.getId().equals(auth.getCurrentUser().getUid())) {
+                        if (auth.getCurrentUser() != null
+                                && doc.getId().equals(
+                                auth.getCurrentUser().getUid()
+                        )) {
+
                             continue;
                         }
 
-                        AvailableDonarModel donor = doc.toObject(AvailableDonarModel.class);
+                        AvailableDonarModel donor =
+                                doc.toObject(
+                                        AvailableDonarModel.class
+                                );
 
-                        if (donor == null) continue;
+                        if (donor == null)
+                            continue;
 
                         donor.setUid(doc.getId());
 
-                        if (donor.getLatitude() == 0 || donor.getLongitude() == 0) {
+                        // BLOOD MATCH CHECK
+
+                        if (donor.getBloodGroup() == null
+                                || !compatibleGroups.contains(
+                                donor.getBloodGroup()
+                        )) {
+
                             continue;
                         }
 
-                        float[] results = new float[1];
+                        // LOCATION CHECK
+
+                        if (donor.getLatitude() == 0
+                                || donor.getLongitude() == 0) {
+
+                            continue;
+                        }
+
+                        float[] results =
+                                new float[1];
 
                         Location.distanceBetween(
-                                userLat, userLng,
-                                donor.getLatitude(), donor.getLongitude(),
+                                userLat,
+                                userLng,
+                                donor.getLatitude(),
+                                donor.getLongitude(),
                                 results
                         );
 
-                        float distanceKm = results[0] / 1000;
+                        float distanceKm =
+                                results[0] / 1000;
 
                         donor.setDistance(distanceKm);
 
-                        if (requestedDonors.contains(donor.getUid())) {
-                            donor.setRequested(true);
-                        } else {
-                            donor.setRequested(false);
-                        }
+                        // REQUEST STATUS
+
+                        donor.setRequested(
+                                requestedDonors.contains(
+                                        donor.getUid()
+                                )
+                        );
+
+                        // MAX DISTANCE
 
                         if (distanceKm <= 20) {
+
                             list.add(donor);
                         }
                     }
 
-                    list.sort((d1, d2) -> Float.compare(d1.getDistance(), d2.getDistance()));
+                    // SORT BY DISTANCE
+
+                    list.sort((d1, d2) ->
+                            Float.compare(
+                                    d1.getDistance(),
+                                    d2.getDistance()
+                            )
+                    );
 
                     adapter.notifyDataSetChanged();
 
                     if (list.isEmpty()) {
-                        Toast.makeText(this, "No donors nearby", Toast.LENGTH_SHORT).show();
-                    }
 
+                        Toast.makeText(
+                                this,
+                                "No compatible donors nearby",
+                                Toast.LENGTH_SHORT
+                        ).show();
+                    }
                 })
+
                 .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Error loading donors", Toast.LENGTH_SHORT).show();
-                    Log.e("ERROR", e.toString());
+
+                    Toast.makeText(
+                            this,
+                            "Error loading donors",
+                            Toast.LENGTH_SHORT
+                    ).show();
+
+                    Log.e(
+                            "ERROR",
+                            e.toString()
+                    );
                 });
+    }
+
+    // BLOOD COMPATIBILITY
+
+    private List<String> getCompatibleDonors(
+            String receiverBlood
+    ) {
+
+        switch (receiverBlood) {
+
+            case "A+":
+                return Arrays.asList(
+                        "A+",
+                        "A-",
+                        "O+",
+                        "O-"
+                );
+
+            case "A-":
+                return Arrays.asList(
+                        "A-",
+                        "O-"
+                );
+
+            case "B+":
+                return Arrays.asList(
+                        "B+",
+                        "B-",
+                        "O+",
+                        "O-"
+                );
+
+            case "B-":
+                return Arrays.asList(
+                        "B-",
+                        "O-"
+                );
+
+            case "AB+":
+                return Arrays.asList(
+                        "A+",
+                        "A-",
+                        "B+",
+                        "B-",
+                        "AB+",
+                        "AB-",
+                        "O+",
+                        "O-"
+                );
+
+            case "AB-":
+                return Arrays.asList(
+                        "A-",
+                        "B-",
+                        "AB-",
+                        "O-"
+                );
+
+            case "O+":
+                return Arrays.asList(
+                        "O+",
+                        "O-"
+                );
+
+            case "O-":
+                return Arrays.asList(
+                        "O-"
+                );
+
+            default:
+                return new ArrayList<>();
+        }
     }
 }
