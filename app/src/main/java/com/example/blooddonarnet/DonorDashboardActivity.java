@@ -243,17 +243,14 @@ public class DonorDashboardActivity
                             "Hello, " + name + " 👋"
                     );
 
+                    // AVAILABILITY
+
                     Boolean available =
-                            doc.getBoolean(
-                                    "availability"
-                            );
+                            doc.getBoolean("availability");
 
-                    if (available != null
-                            && available) {
+                    if (available != null && available) {
 
-                        availabilitySwitch.setChecked(
-                                true
-                        );
+                        availabilitySwitch.setChecked(true);
 
                         statusText.setText(
                                 "Status: Available"
@@ -267,44 +264,58 @@ public class DonorDashboardActivity
 
                     } else {
 
-                        availabilitySwitch.setChecked(
-                                false
-                        );
+                        availabilitySwitch.setChecked(false);
 
                         statusText.setText(
                                 "Status: Not Available"
                         );
+
+                        statusText.setTextColor(
+                                getResources().getColor(
+                                        android.R.color.darker_gray
+                                )
+                        );
                     }
 
-                    Long donations =
-                            doc.getLong(
-                                    "donationsCount"
-                            );
+                    // LIVES SAVED
 
-                    if (donations == null) {
-                        donations = 0L;
+                    Long lives =
+                            doc.getLong("livesSaved");
+
+                    if (lives == null) {
+                        lives = 0L;
                     }
-
-                    long lives =
-                            donations * 3;
 
                     livesSaved.setText(
                             String.valueOf(lives)
                     );
 
-                    String next =
-                            doc.getString(
-                                    "nextDonation"
-                            );
+                    // NEXT DONATION DATE
 
-                    if (next != null) {
+                    Long nextDonationTime =
+                            doc.getLong("nextDonationTime");
 
-                        nextDate.setText(next);
+                    if (nextDonationTime != null) {
+
+                        java.text.SimpleDateFormat sdf =
+                                new java.text.SimpleDateFormat(
+                                        "dd MMM yyyy",
+                                        java.util.Locale.getDefault()
+                                );
+
+                        String formattedDate =
+                                sdf.format(
+                                        new java.util.Date(
+                                                nextDonationTime
+                                        )
+                                );
+
+                        nextDate.setText(formattedDate);
 
                     } else {
 
                         nextDate.setText(
-                                "Not donated yet"
+                                "Eligible Now"
                         );
                     }
                 })
@@ -318,7 +329,6 @@ public class DonorDashboardActivity
                         ).show()
                 );
     }
-
     private void listenForBloodRequests() {
 
         db.collection("requests")

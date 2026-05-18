@@ -53,7 +53,6 @@ public class ReviewRequestAdapter extends RecyclerView.Adapter<ReviewRequestAdap
 
         return new ViewHolder(view);
     }
-
     @Override
     public void onBindViewHolder(
             @NonNull ViewHolder holder,
@@ -87,41 +86,40 @@ public class ReviewRequestAdapter extends RecyclerView.Adapter<ReviewRequestAdap
 
             holder.blood.setText(blood);
 
-            holder.status.setText(
-                    "Status: " + status.toUpperCase()
-            );
+            // STATUS
+
+            if (request.isReceived()) {
+
+                holder.status.setText(
+                        "Status: BLOOD RECEIVED"
+                );
+
+                holder.status.setTextColor(
+                        context.getResources().getColor(
+                                android.R.color.holo_green_dark
+                        )
+                );
+
+            } else {
+
+                holder.status.setText(
+                        "Status: " + status.toUpperCase()
+                );
+            }
+
+            // DISTANCE
 
             try {
 
-                double receiverLat =
-                        request.getReceiverLatitude();
-
-                double receiverLng =
-                        request.getReceiverLongitude();
-
                 float[] results = new float[1];
 
-                if (request.getReceiverLatitude() != null
-                        && request.getReceiverLongitude() != null) {
-
-                    Location.distanceBetween(
-                            donorLat,
-                            donorLng,
-                            request.getReceiverLatitude(),
-                            request.getReceiverLongitude(),
-                            results
-                    );
-
-                    float distanceKm = results[0] / 1000;
-
-                    holder.distance.setText(
-                            String.format("%.1f km away", distanceKm)
-                    );
-
-                } else {
-
-                    holder.distance.setText("Location unavailable");
-                }
+                Location.distanceBetween(
+                        donorLat,
+                        donorLng,
+                        request.getReceiverLatitude(),
+                        request.getReceiverLongitude(),
+                        results
+                );
 
                 float distanceKm =
                         results[0] / 1000;
@@ -140,19 +138,28 @@ public class ReviewRequestAdapter extends RecyclerView.Adapter<ReviewRequestAdap
                 );
             }
 
+            // BUTTON DISABLE CONDITIONS
+
             if (status.equals("accepted")
-                    || status.equals("rejected")) {
+                    || status.equals("rejected")
+                    || request.isReceived()) {
 
                 holder.accept.setEnabled(false);
-
                 holder.reject.setEnabled(false);
+
+                holder.accept.setAlpha(0.5f);
+                holder.reject.setAlpha(0.5f);
 
             } else {
 
                 holder.accept.setEnabled(true);
-
                 holder.reject.setEnabled(true);
+
+                holder.accept.setAlpha(1f);
+                holder.reject.setAlpha(1f);
             }
+
+            // ACCEPT BUTTON
 
             holder.accept.setOnClickListener(v -> {
 
@@ -163,13 +170,17 @@ public class ReviewRequestAdapter extends RecyclerView.Adapter<ReviewRequestAdap
 
                         .addOnSuccessListener(unused -> {
 
+                            request.setStatus("accepted");
+
                             holder.status.setText(
                                     "Status: ACCEPTED"
                             );
 
                             holder.accept.setEnabled(false);
-
                             holder.reject.setEnabled(false);
+
+                            holder.accept.setAlpha(0.5f);
+                            holder.reject.setAlpha(0.5f);
 
                             Toast.makeText(
                                     context,
@@ -178,6 +189,8 @@ public class ReviewRequestAdapter extends RecyclerView.Adapter<ReviewRequestAdap
                             ).show();
                         });
             });
+
+            // REJECT BUTTON
 
             holder.reject.setOnClickListener(v -> {
 
@@ -188,13 +201,17 @@ public class ReviewRequestAdapter extends RecyclerView.Adapter<ReviewRequestAdap
 
                         .addOnSuccessListener(unused -> {
 
+                            request.setStatus("rejected");
+
                             holder.status.setText(
                                     "Status: REJECTED"
                             );
 
                             holder.accept.setEnabled(false);
-
                             holder.reject.setEnabled(false);
+
+                            holder.accept.setAlpha(0.5f);
+                            holder.reject.setAlpha(0.5f);
 
                             Toast.makeText(
                                     context,
@@ -215,7 +232,6 @@ public class ReviewRequestAdapter extends RecyclerView.Adapter<ReviewRequestAdap
             ).show();
         }
     }
-
     @Override
     public int getItemCount() {
 

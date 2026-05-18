@@ -3,6 +3,7 @@
 package com.example.blooddonarnet;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,8 +16,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 
 public class ReceiverRequestAdapter
         extends RecyclerView.Adapter<ReceiverRequestAdapter.ViewHolder> {
@@ -64,9 +68,49 @@ public class ReceiverRequestAdapter
             status = "pending";
         }
 
-        holder.status.setText(
-                "Status: " + status.toUpperCase()
-        );
+        // =========================
+        // STATUS UI
+        // =========================
+
+        if (request.isReceived()) {
+
+            holder.status.setText(
+                    "Status: BLOOD RECEIVED"
+            );
+
+            holder.status.setTextColor(
+                    Color.parseColor("#2E7D32")
+            );
+
+        } else {
+
+            holder.status.setText(
+                    "Status: " + status.toUpperCase()
+            );
+
+            if (status.equals("accepted")) {
+
+                holder.status.setTextColor(
+                        Color.parseColor("#2E7D32")
+                );
+
+            } else if (status.equals("rejected")) {
+
+                holder.status.setTextColor(
+                        Color.parseColor("#C62828")
+                );
+
+            } else {
+
+                holder.status.setTextColor(
+                        Color.parseColor("#FF9800")
+                );
+            }
+        }
+
+        // =========================
+        // SET DATA
+        // =========================
 
         holder.blood.setText(
                 request.getBloodGroup()
@@ -80,17 +124,58 @@ public class ReceiverRequestAdapter
                 "Phone: " + request.getDonorPhone()
         );
 
-        if ("accepted".equals(request.getStatus())
-                && !request.isReceived()) {
+        // =========================
+        // BUTTON STATE
+        // =========================
 
-            holder.receive.setVisibility(View.VISIBLE);
+        if (request.isReceived()) {
+
+            holder.receive.setText(
+                    "Received"
+            );
+
+            holder.receive.setEnabled(false);
+
+            holder.receive.setVisibility(
+                    View.VISIBLE
+            );
+
+            holder.receive.setBackgroundColor(
+                    Color.GRAY
+            );
+
+        } else if ("accepted".equals(status)) {
+
+            holder.receive.setText(
+                    "Mark Received"
+            );
+
+            holder.receive.setEnabled(true);
+
+            holder.receive.setVisibility(
+                    View.VISIBLE
+            );
 
         } else {
 
-            holder.receive.setVisibility(View.GONE);
+            holder.receive.setVisibility(
+                    View.GONE
+            );
         }
 
+        // =========================
+        // RECEIVE BUTTON CLICK
+        // =========================
+
         holder.receive.setOnClickListener(v -> {
+
+            // Prevent double click
+
+            if (request.isReceived()) {
+                return;
+            }
+
+            holder.receive.setEnabled(false);
 
             HashMap<String, Object> updates =
                     new HashMap<>();
@@ -101,24 +186,63 @@ public class ReceiverRequestAdapter
                     .collection("requests")
                     .document(request.getRequestId())
                     .update(updates)
+
                     .addOnSuccessListener(unused -> {
+
+                        // UPDATE LOCAL OBJECT
+
+                        request.setReceived(true);
+
+                        // UPDATE DONOR STATS
 
                         updateDonorStats(
                                 request.getDonorId()
                         );
 
+                        // UPDATE UI IMMEDIATELY
+
+                        holder.status.setText(
+                                "Status: BLOOD RECEIVED"
+                        );
+
+                        holder.status.setTextColor(
+                                Color.parseColor("#2E7D32")
+                        );
+
+                        holder.receive.setText(
+                                "Received"
+                        );
+
+                        holder.receive.setEnabled(false);
+
+                        holder.receive.setBackgroundColor(
+                                Color.GRAY
+                        );
+
                         Toast.makeText(
                                 context,
-                                "Marked as Received",
+                                "Blood marked as received",
                                 Toast.LENGTH_SHORT
                         ).show();
 
-                        holder.receive.setVisibility(
-                                View.GONE
-                        );
+                    })
+
+                    .addOnFailureListener(e -> {
+
+                        holder.receive.setEnabled(true);
+
+                        Toast.makeText(
+                                context,
+                                e.getMessage(),
+                                Toast.LENGTH_SHORT
+                        ).show();
                     });
         });
     }
+
+    // =========================
+    // UPDATE DONOR STATS
+    // =========================
 
     private void updateDonorStats(String donorId) {
 
@@ -131,8 +255,9 @@ public class ReceiverRequestAdapter
 
                 .addOnSuccessListener(doc -> {
 
-                    if (!doc.exists())
+                    if (!doc.exists()) {
                         return;
+                    }
 
                     Long livesSaved =
                             doc.getLong("livesSaved");
@@ -141,62 +266,84 @@ public class ReceiverRequestAdapter
                         livesSaved = 0L;
                     }
 
-                    livesSaved++;
+                    // ADD 3 LIVES
+
+                    livesSaved = livesSaved + 3;
+
+                    // NEXT DONATION AFTER 90 DAYS
 
                     long nextDonationMillis =
                             System.currentTimeMillis()
                                     + (90L * 24 * 60 * 60 * 1000);
 
-                    java.text.SimpleDateFormat sdf =
-                            new java.text.SimpleDateFormat(
+                    SimpleDateFormat sdf =
+                            new SimpleDateFormat(
                                     "dd MMM yyyy",
-                                    java.util.Locale.getDefault()
+                                    Locale.getDefault()
                             );
 
                     String nextDonationDate =
                             sdf.format(
-                                    new java.util.Date(
-                                            nextDonationMillis
-                                    )
+                                    new Date(nextDonationMillis)
                             );
 
-                    HashMap<String, Object> updates =
+                    HashMap<String, Object> donorUpdates =
                             new HashMap<>();
 
-                    updates.put(
+                    donorUpdates.put(
                             "livesSaved",
                             livesSaved
                     );
 
-                    updates.put(
+                    donorUpdates.put(
                             "nextDonation",
                             nextDonationDate
                     );
 
-                    updates.put(
+                    donorUpdates.put(
+                            "nextDonationTime",
+                            nextDonationMillis
+                    );
+
+                    // DONOR NOT AVAILABLE UNTIL NEXT DATE
+
+                    donorUpdates.put(
                             "availability",
                             false
                     );
 
                     db.collection("users")
                             .document(donorId)
-                            .update(updates)
+                            .update(donorUpdates)
 
-                            .addOnSuccessListener(unused ->
+                            .addOnSuccessListener(unused -> {
 
-                                    Toast.makeText(
-                                            context,
-                                            "Donor stats updated",
-                                            Toast.LENGTH_SHORT
-                                    ).show()
-                            );
+                                Toast.makeText(
+                                        context,
+                                        "Donor stats updated successfully",
+                                        Toast.LENGTH_SHORT
+                                ).show();
+                            })
+
+                            .addOnFailureListener(e -> {
+
+                                Toast.makeText(
+                                        context,
+                                        e.getMessage(),
+                                        Toast.LENGTH_SHORT
+                                ).show();
+                            });
                 });
     }
-
     @Override
     public int getItemCount() {
+
         return list.size();
     }
+
+    // =========================
+    // VIEW HOLDER
+    // =========================
 
     public static class ViewHolder
             extends RecyclerView.ViewHolder {
@@ -209,6 +356,7 @@ public class ReceiverRequestAdapter
         Button receive;
 
         public ViewHolder(@NonNull View itemView) {
+
             super(itemView);
 
             status =

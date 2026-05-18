@@ -27,6 +27,8 @@ public class Request {
     public Request() {
     }
 
+    // REQUEST ID
+
     public String getRequestId() {
         return requestId;
     }
@@ -34,6 +36,8 @@ public class Request {
     public void setRequestId(String requestId) {
         this.requestId = requestId;
     }
+
+    // RECEIVER
 
     public String getReceiverId() {
         return receiverId;
@@ -59,6 +63,8 @@ public class Request {
         this.receiverPhone = receiverPhone;
     }
 
+    // LOCATION
+
     public Double getReceiverLatitude() {
         return receiverLatitude;
     }
@@ -74,44 +80,15 @@ public class Request {
     public void setReceiverLongitude(Double receiverLongitude) {
         this.receiverLongitude = receiverLongitude;
     }
+
+    // DONOR
+
     public String getDonorId() {
         return donorId;
     }
 
     public void setDonorId(String donorId) {
         this.donorId = donorId;
-    }
-
-    public String getBloodGroup() {
-        return bloodGroup;
-    }
-
-    public void setBloodGroup(String bloodGroup) {
-        this.bloodGroup = bloodGroup;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public long getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(long timestamp) {
-        this.timestamp = timestamp;
-    }
-
-    public boolean isReceived() {
-        return isReceived;
-    }
-
-    public void setReceived(boolean received) {
-        isReceived = received;
     }
 
     public String getDonorName() {
@@ -128,5 +105,53 @@ public class Request {
 
     public void setDonorPhone(String donorPhone) {
         this.donorPhone = donorPhone;
+    }
+
+    // BLOOD
+
+    public String getBloodGroup() {
+        return bloodGroup;
+    }
+
+    public void setBloodGroup(String bloodGroup) {
+        this.bloodGroup = bloodGroup;
+    }
+
+    // STATUS
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    // TIMESTAMP
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    // RECEIVED
+
+    public boolean isReceived() {
+        return isReceived;
+    }
+
+    public boolean getIsReceived() {
+        return isReceived;
+    }
+
+    public void setReceived(boolean received) {
+        this.isReceived = received;
+    }
+
+    public void setIsReceived(boolean received) {
+        this.isReceived = received;
     }
 }
