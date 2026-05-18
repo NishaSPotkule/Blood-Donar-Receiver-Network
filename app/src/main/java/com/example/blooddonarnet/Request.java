@@ -8,8 +8,8 @@ public class Request {
     private String receiverName;
     private String receiverPhone;
 
-    private double receiverLatitude;
-    private double receiverLongitude;
+    private Double receiverLatitude;
+    private Double receiverLongitude;
 
     private String donorId;
 
@@ -59,22 +59,21 @@ public class Request {
         this.receiverPhone = receiverPhone;
     }
 
-    public double getReceiverLatitude() {
+    public Double getReceiverLatitude() {
         return receiverLatitude;
     }
 
-    public void setReceiverLatitude(double receiverLatitude) {
+    public void setReceiverLatitude(Double receiverLatitude) {
         this.receiverLatitude = receiverLatitude;
     }
 
-    public double getReceiverLongitude() {
+    public Double getReceiverLongitude() {
         return receiverLongitude;
     }
 
-    public void setReceiverLongitude(double receiverLongitude) {
+    public void setReceiverLongitude(Double receiverLongitude) {
         this.receiverLongitude = receiverLongitude;
     }
-
     public String getDonorId() {
         return donorId;
     }
@@ -114,6 +113,7 @@ public class Request {
     public void setReceived(boolean received) {
         isReceived = received;
     }
+
     public String getDonorName() {
         return donorName;
     }

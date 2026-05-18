@@ -1,12 +1,14 @@
+// ReceiverRequestAdapter.java
+
 package com.example.blooddonarnet;
 
 import android.content.Context;
-import android.widget.Toast;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -56,15 +58,29 @@ public class ReceiverRequestAdapter
 
         Request request = list.get(position);
 
+        String status = request.getStatus();
+
+        if (status == null) {
+            status = "pending";
+        }
+
         holder.status.setText(
-                "Status: " + request.getStatus()
+                "Status: " + status.toUpperCase()
         );
 
         holder.blood.setText(
                 request.getBloodGroup()
         );
 
-        if (request.getStatus().equals("accepted")
+        holder.donorName.setText(
+                "Donor: " + request.getDonorName()
+        );
+
+        holder.donorPhone.setText(
+                "Phone: " + request.getDonorPhone()
+        );
+
+        if ("accepted".equals(request.getStatus())
                 && !request.isReceived()) {
 
             holder.receive.setVisibility(View.VISIBLE);
@@ -146,7 +162,10 @@ public class ReceiverRequestAdapter
     public static class ViewHolder
             extends RecyclerView.ViewHolder {
 
-        TextView status, blood;
+        TextView status,
+                blood,
+                donorName,
+                donorPhone;
 
         Button receive;
 
@@ -158,6 +177,12 @@ public class ReceiverRequestAdapter
 
             blood =
                     itemView.findViewById(R.id.tvBlood);
+
+            donorName =
+                    itemView.findViewById(R.id.tvDonorName);
+
+            donorPhone =
+                    itemView.findViewById(R.id.tvDonorPhone);
 
             receive =
                     itemView.findViewById(R.id.btnReceived);

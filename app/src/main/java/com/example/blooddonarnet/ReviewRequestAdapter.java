@@ -16,8 +16,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 
-public class ReviewRequestAdapter
-        extends RecyclerView.Adapter<ReviewRequestAdapter.ViewHolder> {
+public class ReviewRequestAdapter extends RecyclerView.Adapter<ReviewRequestAdapter.ViewHolder> {
 
     Context context;
     ArrayList<Request> list;
@@ -61,130 +60,218 @@ public class ReviewRequestAdapter
             int position
     ) {
 
-        Request request = list.get(position);
+        try {
 
-        holder.name.setText(
-                request.getReceiverName()
-        );
+            Request request = list.get(position);
 
-        holder.phone.setText(
-                request.getReceiverPhone()
-        );
+            String name = request.getReceiverName();
+            String phone = request.getReceiverPhone();
+            String blood = request.getBloodGroup();
+            String status = request.getStatus();
 
-        holder.blood.setText(
-                request.getBloodGroup()
-        );
+            if (name == null)
+                name = "Unknown";
 
-        holder.status.setText(
-                request.getStatus()
-        );
+            if (phone == null)
+                phone = "No Phone";
 
-        // Distance Calculation
+            if (blood == null)
+                blood = "N/A";
 
-        float[] results = new float[1];
+            if (status == null)
+                status = "pending";
 
-        Location.distanceBetween(
-                donorLat,
-                donorLng,
-                request.getReceiverLatitude(),
-                request.getReceiverLongitude(),
-                results
-        );
+            holder.name.setText(name);
 
-        float distanceKm = results[0] / 1000;
+            holder.phone.setText(phone);
 
-        holder.distance.setText(
-                String.format("%.1f km away", distanceKm)
-        );
+            holder.blood.setText(blood);
 
-        // Accept Request
+            holder.status.setText(
+                    "Status: " + status.toUpperCase()
+            );
 
-        holder.accept.setOnClickListener(v -> {
+            try {
 
-            FirebaseFirestore.getInstance()
-                    .collection("requests")
-                    .document(request.getRequestId())
-                    .update("status", "accepted")
-                    .addOnSuccessListener(unused -> {
+                double receiverLat =
+                        request.getReceiverLatitude();
 
-                        holder.status.setText("Accepted");
+                double receiverLng =
+                        request.getReceiverLongitude();
 
-                        Toast.makeText(
-                                context,
-                                "Request Accepted",
-                                Toast.LENGTH_SHORT
-                        ).show();
-                    });
-        });
+                float[] results = new float[1];
 
-        // Reject Request
+                if (request.getReceiverLatitude() != null
+                        && request.getReceiverLongitude() != null) {
 
-        holder.reject.setOnClickListener(v -> {
+                    Location.distanceBetween(
+                            donorLat,
+                            donorLng,
+                            request.getReceiverLatitude(),
+                            request.getReceiverLongitude(),
+                            results
+                    );
 
-            FirebaseFirestore.getInstance()
-                    .collection("requests")
-                    .document(request.getRequestId())
-                    .update("status", "rejected")
-                    .addOnSuccessListener(unused -> {
+                    float distanceKm = results[0] / 1000;
 
-                        holder.status.setText("Rejected");
+                    holder.distance.setText(
+                            String.format("%.1f km away", distanceKm)
+                    );
 
-                        Toast.makeText(
-                                context,
-                                "Request Rejected",
-                                Toast.LENGTH_SHORT
-                        ).show();
-                    });
-        });
+                } else {
+
+                    holder.distance.setText("Location unavailable");
+                }
+
+                float distanceKm =
+                        results[0] / 1000;
+
+                holder.distance.setText(
+                        String.format(
+                                "%.1f km away",
+                                distanceKm
+                        )
+                );
+
+            } catch (Exception e) {
+
+                holder.distance.setText(
+                        "Distance unavailable"
+                );
+            }
+
+            if (status.equals("accepted")
+                    || status.equals("rejected")) {
+
+                holder.accept.setEnabled(false);
+
+                holder.reject.setEnabled(false);
+
+            } else {
+
+                holder.accept.setEnabled(true);
+
+                holder.reject.setEnabled(true);
+            }
+
+            holder.accept.setOnClickListener(v -> {
+
+                FirebaseFirestore.getInstance()
+                        .collection("requests")
+                        .document(request.getRequestId())
+                        .update("status", "accepted")
+
+                        .addOnSuccessListener(unused -> {
+
+                            holder.status.setText(
+                                    "Status: ACCEPTED"
+                            );
+
+                            holder.accept.setEnabled(false);
+
+                            holder.reject.setEnabled(false);
+
+                            Toast.makeText(
+                                    context,
+                                    "Request Accepted",
+                                    Toast.LENGTH_SHORT
+                            ).show();
+                        });
+            });
+
+            holder.reject.setOnClickListener(v -> {
+
+                FirebaseFirestore.getInstance()
+                        .collection("requests")
+                        .document(request.getRequestId())
+                        .update("status", "rejected")
+
+                        .addOnSuccessListener(unused -> {
+
+                            holder.status.setText(
+                                    "Status: REJECTED"
+                            );
+
+                            holder.accept.setEnabled(false);
+
+                            holder.reject.setEnabled(false);
+
+                            Toast.makeText(
+                                    context,
+                                    "Request Rejected",
+                                    Toast.LENGTH_SHORT
+                            ).show();
+                        });
+            });
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            Toast.makeText(
+                    context,
+                    "Adapter Error",
+                    Toast.LENGTH_SHORT
+            ).show();
+        }
     }
 
     @Override
     public int getItemCount() {
+
         return list.size();
     }
 
     public static class ViewHolder
             extends RecyclerView.ViewHolder {
 
-        TextView name,
-                phone,
-                blood,
-                status,
-                distance;
+        TextView name;
+        TextView phone;
+        TextView blood;
+        TextView status;
+        TextView distance;
 
-        Button accept,
-                reject;
+        Button accept;
+        Button reject;
 
         public ViewHolder(@NonNull View itemView) {
+
             super(itemView);
 
-            name = itemView.findViewById(
-                    R.id.tvReceiverName
-            );
+            name =
+                    itemView.findViewById(
+                            R.id.tvReceiverName
+                    );
 
-            phone = itemView.findViewById(
-                    R.id.tvPhone
-            );
+            phone =
+                    itemView.findViewById(
+                            R.id.tvPhone
+                    );
 
-            blood = itemView.findViewById(
-                    R.id.tvBloodGroup
-            );
+            blood =
+                    itemView.findViewById(
+                            R.id.tvBloodGroup
+                    );
 
-            status = itemView.findViewById(
-                    R.id.tvStatus
-            );
+            status =
+                    itemView.findViewById(
+                            R.id.tvStatus
+                    );
 
-            distance = itemView.findViewById(
-                    R.id.tvDistance
-            );
+            distance =
+                    itemView.findViewById(
+                            R.id.tvDistance
+                    );
 
-            accept = itemView.findViewById(
-                    R.id.btnAccept
-            );
+            accept =
+                    itemView.findViewById(
+                            R.id.btnAccept
+                    );
 
-            reject = itemView.findViewById(
-                    R.id.btnReject
-            );
+            reject =
+                    itemView.findViewById(
+                            R.id.btnReject
+                    );
         }
     }
 }

@@ -29,7 +29,7 @@ public class RequestAdapter extends RecyclerView.Adapter<RequestAdapter.ViewHold
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.request_item, parent, false);
+                .inflate(R.layout.item_request, parent, false);
 
         return new ViewHolder(view);
     }
@@ -71,11 +71,11 @@ public class RequestAdapter extends RecyclerView.Adapter<RequestAdapter.ViewHold
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 
-            nameText = itemView.findViewById(R.id.nameText);
-            bloodText = itemView.findViewById(R.id.bloodText);
-            phoneText = itemView.findViewById(R.id.phoneText);
-            acceptBtn = itemView.findViewById(R.id.acceptbtn);
-            rejectBtn = itemView.findViewById(R.id.rejectbtn);
+            nameText = itemView.findViewById(R.id.tvReceiverName);
+            bloodText = itemView.findViewById(R.id.tvBloodGroup);
+            phoneText = itemView.findViewById(R.id.tvPhone);
+            acceptBtn = itemView.findViewById(R.id.btnAccept);
+            rejectBtn = itemView.findViewById(R.id.btnReject);
         }
     }
 }

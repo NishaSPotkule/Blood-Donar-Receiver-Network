@@ -17,30 +17,51 @@
 
         <TextView
             android:id="@+id/tvBlood"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:text="A+"
             android:textStyle="bold"
             android:textSize="20sp"
-            android:textColor="#C62828"
+            android:textColor="#C62828"/>
+
+        <TextView
+            android:id="@+id/tvDonorName"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:text="Donor Name"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:textColor="#212121"
+            android:layout_marginTop="10dp"/>
+
+        <TextView
+            android:id="@+id/tvDonorPhone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="+91 9876543210"
+            android:textSize="14sp"
+            android:textColor="#666666"
+            android:layout_marginTop="4dp"/>
 
         <TextView
             android:id="@+id/tvStatus"
-            android:text="Status"
-            android:textSize="15sp"
-            android:layout_marginTop="8dp"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:text="Status"
+            android:textStyle="bold"
+            android:textSize="15sp"
+            android:textColor="#444444"
+            android:layout_marginTop="10dp"/>
 
         <Button
             android:id="@+id/btnReceived"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
             android:text="Received"
             android:textStyle="bold"
             android:textColor="#FFFFFF"
             android:backgroundTint="#2E7D32"
-            android:layout_marginTop="14dp"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"/>
+            android:layout_marginTop="14dp"/>
 
     </LinearLayout>
 

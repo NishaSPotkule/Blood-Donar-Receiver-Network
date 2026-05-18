@@ -1,3 +1,5 @@
+// ReviewRequestsActivity.java
+
 package com.example.blooddonarnet;
 
 import android.os.Bundle;
@@ -9,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
@@ -25,15 +28,21 @@ public class ReviewRequestsActivity
     TextView requestCount;
 
     FirebaseFirestore db;
+
     FirebaseAuth auth;
 
     double donorLat;
+
     double donorLng;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_review_requests);
+
+        setContentView(
+                R.layout.activity_review_requests
+        );
 
         recyclerView =
                 findViewById(R.id.recyclerRequests);
@@ -41,15 +50,32 @@ public class ReviewRequestsActivity
         requestCount =
                 findViewById(R.id.requestCount);
 
-        db = FirebaseFirestore.getInstance();
-        auth = FirebaseAuth.getInstance();
+        db =
+                FirebaseFirestore.getInstance();
 
-        list = new ArrayList<>();
+        auth =
+                FirebaseAuth.getInstance();
+
+        list =
+                new ArrayList<>();
 
         loadDonorLocation();
     }
 
     private void loadDonorLocation() {
+
+        if (auth.getCurrentUser() == null) {
+
+            Toast.makeText(
+                    this,
+                    "User not logged in",
+                    Toast.LENGTH_SHORT
+            ).show();
+
+            finish();
+
+            return;
+        }
 
         String donorId =
                 auth.getCurrentUser().getUid();
@@ -57,93 +83,156 @@ public class ReviewRequestsActivity
         db.collection("users")
                 .document(donorId)
                 .get()
+
                 .addOnSuccessListener(document -> {
 
-                    if (document.exists()) {
+                    if (!document.exists()) {
 
-                        Double lat =
-                                document.getDouble("latitude");
+                        Toast.makeText(
+                                this,
+                                "User data not found",
+                                Toast.LENGTH_SHORT
+                        ).show();
 
-                        Double lng =
-                                document.getDouble("longitude");
-
-                        if (lat != null)
-                            donorLat = lat;
-
-                        if (lng != null)
-                            donorLng = lng;
-
-                        // Setup Adapter
-
-                        adapter =
-                                new ReviewRequestAdapter(
-                                        this,
-                                        list,
-                                        donorLat,
-                                        donorLng
-                                );
-
-                        recyclerView.setLayoutManager(
-                                new LinearLayoutManager(this)
-                        );
-
-                        recyclerView.setAdapter(adapter);
-
-                        loadRequests();
+                        return;
                     }
-                });
+
+                    Double lat =
+                            document.getDouble(
+                                    "latitude"
+                            );
+
+                    Double lng =
+                            document.getDouble(
+                                    "longitude"
+                            );
+
+                    if (lat != null) {
+
+                        donorLat = lat;
+                    }
+
+                    if (lng != null) {
+
+                        donorLng = lng;
+                    }
+
+                    adapter =
+                            new ReviewRequestAdapter(
+                                    this,
+                                    list,
+                                    donorLat,
+                                    donorLng
+                            );
+
+                    recyclerView.setLayoutManager(
+                            new LinearLayoutManager(
+                                    this
+                            )
+                    );
+
+                    recyclerView.setAdapter(
+                            adapter
+                    );
+
+                    loadRequests();
+                })
+
+                .addOnFailureListener(e ->
+
+                        Toast.makeText(
+                                this,
+                                e.getMessage(),
+                                Toast.LENGTH_SHORT
+                        ).show()
+                );
     }
 
     private void loadRequests() {
+
+        if (auth.getCurrentUser() == null) {
+
+            Toast.makeText(
+                    this,
+                    "User not logged in",
+                    Toast.LENGTH_SHORT
+            ).show();
+
+            finish();
+
+            return;
+        }
 
         String donorId =
                 auth.getCurrentUser().getUid();
 
         db.collection("requests")
-                .whereEqualTo("donorId", donorId)
+                .whereEqualTo(
+                        "donorId",
+                        donorId
+                )
                 .get()
+
                 .addOnSuccessListener(query -> {
 
                     list.clear();
 
-                    for (var doc :
-                            query.getDocuments()) {
+                    for (DocumentSnapshot doc
+                            : query.getDocuments()) {
 
-                        Request request =
-                                doc.toObject(Request.class);
+                        try {
 
-                        if (request == null)
-                            continue;
+                            Request request =
+                                    doc.toObject(
+                                            Request.class
+                                    );
 
-                        request.setRequestId(
-                                doc.getId()
-                        );
+                            if (request == null)
+                                continue;
 
-                        Double receiverLat =
-                                doc.getDouble(
-                                        "receiverLatitude"
-                                );
-
-                        Double receiverLng =
-                                doc.getDouble(
-                                        "receiverLongitude"
-                                );
-
-                        if (receiverLat != null)
-                            request.setReceiverLatitude(
-                                    receiverLat
+                            request.setRequestId(
+                                    doc.getId()
                             );
 
-                        if (receiverLng != null)
-                            request.setReceiverLongitude(
-                                    receiverLng
-                            );
+                            if (request.getStatus() == null) {
 
-                        list.add(request);
+                                request.setStatus(
+                                        "pending"
+                                );
+                            }
+
+                            if (request.getReceiverName() == null) {
+
+                                request.setReceiverName(
+                                        "Unknown"
+                                );
+                            }
+
+                            if (request.getReceiverPhone() == null) {
+
+                                request.setReceiverPhone(
+                                        "No Phone"
+                                );
+                            }
+
+                            if (request.getBloodGroup() == null) {
+
+                                request.setBloodGroup(
+                                        "N/A"
+                                );
+                            }
+
+                            list.add(request);
+
+                        } catch (Exception e) {
+
+                            e.printStackTrace();
+                        }
                     }
 
                     requestCount.setText(
-                            list.size() + " Requests"
+                            list.size()
+                                    + " Requests"
                     );
 
                     adapter.notifyDataSetChanged();
@@ -156,6 +245,15 @@ public class ReviewRequestsActivity
                                 Toast.LENGTH_SHORT
                         ).show();
                     }
-                });
+                })
+
+                .addOnFailureListener(e ->
+
+                        Toast.makeText(
+                                this,
+                                e.getMessage(),
+                                Toast.LENGTH_LONG
+                        ).show()
+                );
     }
 }

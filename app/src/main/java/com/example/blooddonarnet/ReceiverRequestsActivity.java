@@ -8,10 +8,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
 
-public class ReceiverRequestsActivity extends AppCompatActivity {
+public class ReceiverRequestsActivity
+        extends AppCompatActivity {
 
     RecyclerView recyclerView;
 
@@ -22,13 +24,23 @@ public class ReceiverRequestsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_receiver_requests);
 
-        recyclerView = findViewById(R.id.recyclerReceiverRequests);
+        setContentView(
+                R.layout.activity_receiver_requests
+        );
+
+        recyclerView =
+                findViewById(
+                        R.id.recyclerReceiverRequests
+                );
 
         list = new ArrayList<>();
 
-        adapter = new ReceiverRequestAdapter(this, list);
+        adapter =
+                new ReceiverRequestAdapter(
+                        this,
+                        list
+                );
 
         recyclerView.setLayoutManager(
                 new LinearLayoutManager(this)
@@ -41,6 +53,12 @@ public class ReceiverRequestsActivity extends AppCompatActivity {
 
     private void loadRequests() {
 
+        if (FirebaseAuth.getInstance()
+                .getCurrentUser() == null) {
+
+            return;
+        }
+
         String receiverId =
                 FirebaseAuth.getInstance()
                         .getCurrentUser()
@@ -48,23 +66,49 @@ public class ReceiverRequestsActivity extends AppCompatActivity {
 
         FirebaseFirestore.getInstance()
                 .collection("requests")
-                .whereEqualTo("receiverId", receiverId)
+
+                .whereEqualTo(
+                        "receiverId",
+                        receiverId
+                )
+
                 .get()
+
                 .addOnSuccessListener(query -> {
 
                     list.clear();
 
-                    for (var doc : query.getDocuments()) {
+                    for (QueryDocumentSnapshot doc
+                            : query) {
 
-                        Request request =
-                                doc.toObject(Request.class);
+                        try {
 
-                        if (request == null)
-                            continue;
+                            Request request =
+                                    doc.toObject(
+                                            Request.class
+                                    );
 
-                        request.setRequestId(doc.getId());
+                            if (request == null)
+                                continue;
 
-                        list.add(request);
+                            request.setRequestId(
+                                    doc.getId()
+                            );
+
+                            if (request.getStatus()
+                                    == null) {
+
+                                request.setStatus(
+                                        "pending"
+                                );
+                            }
+
+                            list.add(request);
+
+                        } catch (Exception e) {
+
+                            e.printStackTrace();
+                        }
                     }
 
                     adapter.notifyDataSetChanged();
