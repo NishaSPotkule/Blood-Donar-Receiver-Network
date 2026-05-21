@@ -80,7 +80,7 @@ The main objective of BloodDonorNet is to reduce delays in emergency blood avail
 ## Login Screen
 ![Login Screen](login.jpeg)
 
-##Signup Screen
+## Signup Screen
 ![signup Screen](signup.jpeg)
 
 ## Receiver Dashboard
@@ -95,7 +95,7 @@ The main objective of BloodDonorNet is to reduce delays in emergency blood avail
 ## Blood Request
 ![Blood Request](receiver_request.jpeg)
 
-##Donor Review Request
+## Donor Review Request
 ![Donor Review Request](donor_review_request.jpeg)
 
 ## User Profile
