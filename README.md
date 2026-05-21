@@ -93,7 +93,7 @@ The main objective of BloodDonorNet is to reduce delays in emergency blood avail
 ![Available Donors](availabledonors.jpeg)
 
 ## Blood Request
-![Blood Request](receiver_request.jpeg)
+![Blood Request](receiver_requests.jpeg)
 
 ## Donor Review Request
 ![Donor Review Request](donor_review_request.jpeg)
