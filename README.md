@@ -1,5 +1,5 @@
 # BloodDonorNet 🩸  
-### Smart Blood Donation & Emergency Donor Management System
+### Blood Donors and Receiver Connector
 
 ## 📌 Overview
 BloodDonorNet is an Android-based blood donation application designed to connect blood donors and receivers efficiently during medical emergencies. The application helps receivers quickly find compatible donors nearby, send blood requests, and track donation status in real time.
