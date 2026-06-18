@@ -72,37 +72,6 @@ The main objective of BloodDonorNet is to reduce delays in emergency blood avail
 
 ---
 
-# 📱 Screenshots
-
-## Splash Screen
-![Splash Screen](splash.jpeg)
-
-## Login Screen
-![Login Screen](login.jpeg)
-
-## Signup Screen
-![signup Screen](signup.jpeg)
-
-## Receiver Dashboard
-![Receiver Dashboard](receiver_dashboard1.jpeg)
-
-## Donor Dashboard
-![Donor Dashboard](donor_dashboard.jpeg)
-
-## Available Donors
-![Available Donors](availabledonors.jpeg)
-
-## Blood Request
-![Blood Request](receiver_requests.jpeg)
-
-## Donor Review Request
-![Donor Review Request](donor_review_request.jpeg)
-
-## User Profile
-![User Profile](profile.jpeg)
-
----
-
 # ⚙ Installation
 
 ## Clone the Repository
