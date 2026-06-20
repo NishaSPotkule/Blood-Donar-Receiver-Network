@@ -32,7 +32,7 @@ The main objective of BloodDonorNet is to reduce delays in emergency blood avail
 
 ---
 
-## 🔄 Real-Time Request Management
+## 🔄 Request Management
 1. Receiver searches for matching donors  
 2. Receiver sends a blood request  
 3. Donor receives the request  
